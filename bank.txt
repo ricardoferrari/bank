@@ -1,0 +1,1 @@
+{"Deza":900,"Haroldo":250,"Ricardo":300}

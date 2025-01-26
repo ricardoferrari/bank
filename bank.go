@@ -2,11 +2,60 @@ package main
 
 // Bank is a bank with a number of accounts.
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 )
 
 type Bank struct {
 	accounts map[string]int
+}
+
+func (b *Bank) writeBankToFile() {
+	// Open file for writing
+	file, err := os.Create("bank.txt")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	//Converts bank object to json string
+	bankJson, err := json.Marshal(b.accounts)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(bankJson))
+	// Save bank object to file
+	_, err = file.WriteString(string(bankJson))
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
+}
+
+func readBankFromFile() *Bank {
+	// Open file for reading
+	file, err := os.Open("bank.txt")
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	// Read bank object from file
+	var bank Bank
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&bank.accounts)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+	// _, err = fmt.Fscanf(file, "%v\n", &bank)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return nil
+	// }
+	defer file.Close()
+	return &bank
 }
 
 // NewBank creates a new bank with no accounts.
@@ -71,7 +120,9 @@ func main() {
 		fmt.Println("4. Transfer")
 		fmt.Println("5. Balance")
 		fmt.Println("6. Print Accounts")
-		fmt.Println("7. Exit")
+		fmt.Println("7. Save Data")
+		fmt.Println("8. Recover Data")
+		fmt.Println("9. Exit")
 		fmt.Scanln(&choice)
 		switch choice {
 		case 1:
@@ -120,9 +171,15 @@ func main() {
 			fmt.Println("Press enter to continue...")
 			fmt.Scanln()
 		case 7:
+			bank.writeBankToFile()
+			fmt.Println("Saved enter to continue...")
+			fmt.Scanln()
+		case 8:
+			bank = readBankFromFile()
+		case 9:
+			fmt.Println("Thanks for choosing our bank!")
 			exitFlag = true
 		}
 	}
 
-	fmt.Println("Thanks for choosing our bank!")
 }
